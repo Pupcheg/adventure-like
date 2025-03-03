@@ -9,51 +9,66 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Deque;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 public class BuilderImplCollectionParameterInitializer extends BuilderImplParameterInitializer {
     private final MoreTypes moreTypes;
-    private final ClassName implClass;
+    private final CollectionParameter collectionParameter;
 
     public BuilderImplCollectionParameterInitializer(MoreTypes moreTypes, ParameterSpec parameter) {
         super(parameter);
         this.moreTypes = moreTypes;
-        this.implClass = implementationClass();
+        this.collectionParameter = implementationClass();
     }
 
     @Override
     public CodeBlock newValueInitializer() {
-        return CodeBlock.of("this.$L = new $T<>();\n", parameter.name(), implClass);
+        return CodeBlock.of("this.$L = new $T<>();\n", parameter.name(), collectionParameter.implClass());
     }
 
     @Override
     public CodeBlock copyingInitializer(String from) {
-        return CodeBlock.of("this.$L = new $T<>($L.$L);\n", parameter.name(), implClass, from, parameter.name());
+        return CodeBlock.of("this.$L = new $T<>($L.$L);\n", parameter.name(), collectionParameter.implClass(), from, parameter.name());
     }
 
-    private @NotNull ClassName implementationClass() {
+    @Override
+    public CodeBlock finalizer() {
+        return collectionParameter.finalizer().apply(parameter);
+    }
+
+    private @NotNull CollectionParameter implementationClass() {
         TypeName type = parameter.type();
 
-        if(moreTypes.isAccessible(Deque.class, type)) {
-            return ClassName.get(LinkedList.class);
-        }
-
         if (moreTypes.isAccessible(List.class, type)) {
-            return ClassName.get(ArrayList.class);
+            return new CollectionParameter(
+                    ClassName.get(ArrayList.class),
+                    param -> CodeBlock.of("$T.copyOf($L)", List.class, param.name())
+            );
         }
 
         if (moreTypes.isAccessible(Set.class, type)) {
-            return ClassName.get(LinkedHashSet.class);
+            return new CollectionParameter(
+                    ClassName.get(LinkedHashSet.class),
+                    param -> CodeBlock.of("$T.copyOf($L)", Set.class, param.name())
+            );
         }
 
-        if(moreTypes.isAccessible(Collection.class, type)) {
-            return ClassName.get(ArrayList.class);
+        if (moreTypes.isAccessible(Collection.class, type)) {
+            return new CollectionParameter(
+                    ClassName.get(ArrayList.class),
+                    param -> CodeBlock.of("$T.copyOf($L)", List.class, param.name())
+            );
         }
 
         throw new IllegalArgumentException("Unsupported type: " + type);
+    }
+
+    record CollectionParameter(
+            ClassName implClass,
+            Function<ParameterSpec, CodeBlock> finalizer
+    ) {
     }
 }

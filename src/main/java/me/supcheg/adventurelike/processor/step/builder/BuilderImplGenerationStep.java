@@ -51,7 +51,7 @@ public class BuilderImplGenerationStep implements GenerationStep {
             parameterGenerationStep(parameter).generate(targetBuilder);
         }
 
-        new BuilderImplBuildMethodGenerationStep(buildableImplClassName, parameters).generate(targetBuilder);
+        new BuilderImplBuildMethodGenerationStep(buildableImplClassName, parameterInitializers).generate(targetBuilder);
         target.addType(targetBuilder.build());
 
         new ToBuilderImplGenerationStep(builderImplClassName).generate(target);
