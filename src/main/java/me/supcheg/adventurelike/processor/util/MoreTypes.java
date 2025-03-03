@@ -6,7 +6,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
 
@@ -14,6 +13,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MoreTypes {
     private final ProcessingEnvironment env;
+    private final String rawObject = Object.class.getName();
 
     public boolean isAccessible(@NotNull Class<?> superType, @NotNull TypeName type) {
         if (type.isPrimitive()) {
@@ -28,12 +28,13 @@ public class MoreTypes {
     }
 
     private boolean containsSubtype(@NotNull TypeMirror type, @NotNull String looking) {
+        String typeName = toNoGenericString(type.toString());
 
-        if (toNoGenericString(type.toString()).equals(looking)) {
+        if (typeName.equals(looking)) {
             return true;
         }
 
-        if (toNoGenericString(type.toString()).equals("java.lang.Object")) {
+        if (typeName.equals(rawObject)) {
             return false;
         }
 
@@ -47,12 +48,8 @@ public class MoreTypes {
         return false;
     }
 
-    private boolean isReferenceType(@NotNull TypeMirror type) {
-        return !type.getKind().isPrimitive() && type.getKind() != TypeKind.VOID;
-    }
-
     @NotNull
-    private String toNoGenericString(@NotNull String type) {
+    private static String toNoGenericString(@NotNull String type) {
         int genericInfoStartIndex = type.indexOf("<");
 
         return genericInfoStartIndex == -1 ?
@@ -61,7 +58,7 @@ public class MoreTypes {
     }
 
     @NotNull
-    private TypeMirror getTypeMirror(@NotNull TypeName name) {
+    public TypeMirror getTypeMirror(@NotNull TypeName name) {
         TypeElement typeElement = env.getElementUtils().getTypeElement(toNoGenericString(name.toString()));
         if (typeElement == null) {
             throw new NullPointerException("Cannot get type mirror for name " + name);

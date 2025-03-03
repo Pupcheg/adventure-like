@@ -27,19 +27,24 @@ import java.util.Set;
 @SupportedAnnotationTypes("me.supcheg.adventurelike.AdventureLike")
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class AdventureLikeProcessor extends AbstractProcessor {
-    private final AdventureLikeGenerationStrategy defaultStrategy = new SimpleAdventureLikeGenerationStrategy(
-            new ParameterSpecLookup()
-    );
-    private final AdventureLikeGenerationStrategy buildableStrategy = new BuildableAdventureLikeGenerationStrategy(
-            new AnnotationHelper(),
-            new ParameterSpecLookup()
-    );
+    private AdventureLikeGenerationStrategy defaultStrategy;
+    private AdventureLikeGenerationStrategy buildableStrategy;
     private MoreTypes moreTypes;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         this.moreTypes = new MoreTypes(processingEnv);
+
+        this.defaultStrategy = new SimpleAdventureLikeGenerationStrategy(
+                new ParameterSpecLookup()
+        );
+
+        this.buildableStrategy = new BuildableAdventureLikeGenerationStrategy(
+                new AnnotationHelper(),
+                moreTypes,
+                new ParameterSpecLookup()
+        );
     }
 
     @Override

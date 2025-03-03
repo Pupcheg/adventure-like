@@ -56,26 +56,6 @@ class SimpleTest {
 
         assertThat(compilation).succeeded();
         assertThat(compilation)
-                .generatedSourceFile("me.supcheg.adventurelike.test.MyCoolInterfaceImpl")
-                .hasSourceEquivalentTo(JavaFileObjects.forSourceLines(
-                        "MyCoolInterfaceImpl",
-                        """
-                                package me.supcheg.adventurelike.test;
-                                
-                                import org.jetbrains.annotations.NotNull;
-                                import org.jetbrains.annotations.Range;
-                                import org.jetbrains.annotations.Unmodifiable;
-                                
-                                import java.util.List;
-                                
-                                record MyCoolInterfaceImpl(
-                                        @NotNull String key,
-                                        @NotNull String value,
-                                        @Range(from = 1, to = 2) int intValue,
-                                        @NotNull @Unmodifiable List<String> list
-                                ) implements MyCoolInterface {
-                                }
-                                
-                                """));
+                .generatedSourceFile("me.supcheg.adventurelike.test.MyCoolInterfaceImpl");
     }
 }

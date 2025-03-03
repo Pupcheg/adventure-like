@@ -65,6 +65,21 @@ public class AnnotationHelper {
     }
 
     @NotNull
+    public List<AnnotationSpec> removeIfPresent(
+            @NotNull List<AnnotationSpec> annotations,
+            @NotNull Class<? extends Annotation> type
+    ) {
+        ClassName annotationName = ClassName.get(type);
+        if (annotations.stream().map(AnnotationSpec::type).noneMatch(isEqual(annotationName))) {
+            return annotations;
+        }
+
+        List<AnnotationSpec> copy = new ArrayList<>(annotations);
+        copy.removeIf(annotationSpec -> annotationSpec.type().equals(annotationName));
+        return copy;
+    }
+
+    @NotNull
     @Contract("_ -> new")
     private static AnnotationSpec annotationSpec(Class<? extends Annotation> type) {
         return AnnotationSpec.builder(type).build();
