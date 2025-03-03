@@ -7,6 +7,7 @@ import com.palantir.javapoet.FieldSpec;
 import com.palantir.javapoet.ParameterSpec;
 import me.supcheg.adventurelike.processor.util.AnnotationHelper;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -21,6 +22,14 @@ public class BuilderImplCollectionParameterGenerationStep extends BuilderImplPar
     protected FieldSpec.Builder fieldSpec() {
         return super.fieldSpec()
                 .addModifiers(Modifier.FINAL);
+    }
+
+    @Override
+    protected List<AnnotationSpec> fieldAnnotations() {
+        return annotationHelper.removeIfPresent(
+                super.fieldAnnotations(),
+                Unmodifiable.class
+        );
     }
 
     @Override
