@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'io.freefair.lombok' version '8.6'
+    id 'maven-publish'
 }
 
 group = 'me.supcheg'
@@ -22,4 +23,17 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        create('maven', MavenPublication) {
+            artifactId = 'adventure-like'
+            from components.java
+        }
+    }
+
+    repositories {
+        mavenLocal()
+    }
 }

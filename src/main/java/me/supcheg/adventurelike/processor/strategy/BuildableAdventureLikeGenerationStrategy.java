@@ -6,6 +6,7 @@ import com.palantir.javapoet.TypeSpec;
 import lombok.RequiredArgsConstructor;
 import me.supcheg.adventurelike.processor.parameter.ParameterSpecLookup;
 import me.supcheg.adventurelike.processor.step.ConstructorGenerationStep;
+import me.supcheg.adventurelike.processor.step.GeneratedAnnotationGenerationStep;
 import me.supcheg.adventurelike.processor.step.builder.BuilderImplGenerationStep;
 import me.supcheg.adventurelike.processor.util.AnnotationHelper;
 import me.supcheg.adventurelike.processor.util.MoreTypes;
@@ -47,6 +48,8 @@ public class BuildableAdventureLikeGenerationStrategy implements AdventureLikeGe
                 element,
                 parameters
         ).generate(target);
+
+        new GeneratedAnnotationGenerationStep().generate(target);
 
         return target.build();
     }
