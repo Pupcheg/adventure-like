@@ -33,6 +33,6 @@ public class GeneratedAnnotationGenerationStep implements GenerationStep {
                 "No parameters found" :
                 parameters.stream()
                         .map(param -> param.type() + " " + param.name())
-                        .collect(joining(", ", "Parameters: ", ""));
+                        .collect(joining(", ", "Parameters (%d): ".formatted(parameters.size()), ""));
     }
 }
