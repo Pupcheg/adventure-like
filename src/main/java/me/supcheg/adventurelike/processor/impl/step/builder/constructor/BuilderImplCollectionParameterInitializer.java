@@ -9,9 +9,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.function.Function;
 
 public class BuilderImplCollectionParameterInitializer extends BuilderImplParameterInitializer {
@@ -41,6 +44,13 @@ public class BuilderImplCollectionParameterInitializer extends BuilderImplParame
 
     private @NotNull CollectionParameter implementationClass() {
         TypeName type = parameter.type();
+
+        if (moreTypes.isAccessible(SortedSet.class, type)) {
+            return new CollectionParameter(
+                    ClassName.get(TreeSet.class),
+                    param -> CodeBlock.of("$T.unmodifiableSortedSet(new $T<>($L))", Collections.class, TreeSet.class, param.name())
+            );
+        }
 
         if (moreTypes.isAccessible(List.class, type)) {
             return new CollectionParameter(
