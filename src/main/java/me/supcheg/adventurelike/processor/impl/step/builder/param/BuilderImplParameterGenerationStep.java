@@ -1,4 +1,4 @@
-package me.supcheg.adventurelike.processor.step.builder.param;
+package me.supcheg.adventurelike.processor.impl.step.builder.param;
 
 import com.palantir.javapoet.AnnotationSpec;
 import com.palantir.javapoet.ClassName;
@@ -8,8 +8,9 @@ import com.palantir.javapoet.MethodSpec;
 import com.palantir.javapoet.ParameterSpec;
 import com.palantir.javapoet.TypeSpec;
 import lombok.RequiredArgsConstructor;
-import me.supcheg.adventurelike.processor.step.GenerationStep;
-import me.supcheg.adventurelike.processor.util.AnnotationHelper;
+import me.supcheg.adventurelike.processor.impl.step.GenerationStep;
+import me.supcheg.adventurelike.processor.impl.util.AnnotationHelper;
+import me.supcheg.adventurelike.processor.value.ValueParameter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +20,7 @@ import java.util.Objects;
 
 @RequiredArgsConstructor
 public class BuilderImplParameterGenerationStep implements GenerationStep {
-    protected final ParameterSpec parameter;
+    protected final ValueParameter parameter;
     protected final AnnotationHelper annotationHelper;
     protected final ClassName builderImplClass;
 
@@ -32,15 +33,7 @@ public class BuilderImplParameterGenerationStep implements GenerationStep {
 
     protected FieldSpec.Builder fieldSpec() {
         return FieldSpec.builder(parameter.type().box(), parameter.name())
-                .addModifiers(Modifier.PRIVATE)
-                .addAnnotations(fieldAnnotations());
-    }
-
-    protected List<AnnotationSpec> fieldAnnotations() {
-        return annotationHelper.putNullabilityAnnotation(
-                parameter.annotations(),
-                NotNull.class
-        );
+                .addModifiers(Modifier.PRIVATE);
     }
 
     protected MethodSpec.Builder setter() {

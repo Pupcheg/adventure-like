@@ -1,4 +1,4 @@
-package me.supcheg.adventurelike.processor.util;
+package me.supcheg.adventurelike.processor.impl.util;
 
 import com.palantir.javapoet.AnnotationSpec;
 import com.palantir.javapoet.ClassName;

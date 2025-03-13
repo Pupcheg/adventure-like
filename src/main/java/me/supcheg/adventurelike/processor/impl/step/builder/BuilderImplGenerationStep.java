@@ -1,20 +1,20 @@
-package me.supcheg.adventurelike.processor.step.builder;
+package me.supcheg.adventurelike.processor.impl.step.builder;
 
 import com.palantir.javapoet.ClassName;
-import com.palantir.javapoet.ParameterSpec;
 import com.palantir.javapoet.TypeSpec;
 import lombok.RequiredArgsConstructor;
-import me.supcheg.adventurelike.processor.step.GenerationStep;
-import me.supcheg.adventurelike.processor.step.ToBuilderImplGenerationStep;
-import me.supcheg.adventurelike.processor.step.builder.constructor.BuilderImplCollectionParameterInitializer;
-import me.supcheg.adventurelike.processor.step.builder.constructor.BuilderImplNoArgsConstructorGenerationStep;
-import me.supcheg.adventurelike.processor.step.builder.constructor.BuilderImplParameterInitializer;
-import me.supcheg.adventurelike.processor.step.builder.constructor.BuilderImplTargetConstructorGenerationStep;
-import me.supcheg.adventurelike.processor.step.builder.param.BuilderImplCollectionParameterGenerationStep;
-import me.supcheg.adventurelike.processor.step.builder.param.BuilderImplParameterGenerationStep;
-import me.supcheg.adventurelike.processor.step.builder.param.BuilderImplPrimitiveParameterGenerationStep;
-import me.supcheg.adventurelike.processor.util.AnnotationHelper;
-import me.supcheg.adventurelike.processor.util.MoreTypes;
+import me.supcheg.adventurelike.processor.impl.step.GenerationStep;
+import me.supcheg.adventurelike.processor.impl.step.ToBuilderImplGenerationStep;
+import me.supcheg.adventurelike.processor.impl.step.builder.constructor.BuilderImplCollectionParameterInitializer;
+import me.supcheg.adventurelike.processor.impl.step.builder.constructor.BuilderImplNoArgsConstructorGenerationStep;
+import me.supcheg.adventurelike.processor.impl.step.builder.constructor.BuilderImplParameterInitializer;
+import me.supcheg.adventurelike.processor.impl.step.builder.constructor.BuilderImplTargetConstructorGenerationStep;
+import me.supcheg.adventurelike.processor.impl.step.builder.param.BuilderImplCollectionParameterGenerationStep;
+import me.supcheg.adventurelike.processor.impl.step.builder.param.BuilderImplParameterGenerationStep;
+import me.supcheg.adventurelike.processor.impl.step.builder.param.BuilderImplPrimitiveParameterGenerationStep;
+import me.supcheg.adventurelike.processor.impl.util.AnnotationHelper;
+import me.supcheg.adventurelike.processor.impl.util.MoreTypes;
+import me.supcheg.adventurelike.processor.value.ValueParameter;
 import org.jetbrains.annotations.NotNull;
 
 import javax.lang.model.element.Element;
@@ -32,13 +32,13 @@ public class BuilderImplGenerationStep implements GenerationStep {
     private final ClassName buildableImplClassName;
     private final ClassName builderImplClassName;
     private final Element element;
-    private final List<ParameterSpec> parameters;
+    private final List<ValueParameter> parameters;
 
     @Override
     public void generate(TypeSpec.@NotNull Builder target) {
         TypeSpec.Builder targetBuilder = TypeSpec.classBuilder(builderImplClassName)
                 .addSuperinterface(findBuilderElement(element).asType())
-                .addModifiers(Modifier.STATIC);
+                .addModifiers(Modifier.STATIC, Modifier.FINAL);
 
         List<BuilderImplParameterInitializer> parameterInitializers = parameters.stream()
                 .map(this::parameterInitializer)
@@ -47,7 +47,7 @@ public class BuilderImplGenerationStep implements GenerationStep {
         new BuilderImplNoArgsConstructorGenerationStep(parameterInitializers).generate(targetBuilder);
         new BuilderImplTargetConstructorGenerationStep(buildableImplClassName, parameterInitializers).generate(targetBuilder);
 
-        for (ParameterSpec parameter : parameters) {
+        for (ValueParameter parameter : parameters) {
             parameterGenerationStep(parameter).generate(targetBuilder);
         }
 
@@ -66,7 +66,7 @@ public class BuilderImplGenerationStep implements GenerationStep {
         throw new IllegalArgumentException("No builder found for element " + element);
     }
 
-    private BuilderImplParameterInitializer parameterInitializer(@NotNull ParameterSpec parameter) {
+    private BuilderImplParameterInitializer parameterInitializer(@NotNull ValueParameter parameter) {
         if (moreTypes.isAccessible(Collection.class, parameter.type())) {
             return new BuilderImplCollectionParameterInitializer(moreTypes, parameter);
         }
@@ -74,7 +74,7 @@ public class BuilderImplGenerationStep implements GenerationStep {
         return new BuilderImplParameterInitializer(parameter);
     }
 
-    private BuilderImplParameterGenerationStep parameterGenerationStep(@NotNull ParameterSpec parameter) {
+    private BuilderImplParameterGenerationStep parameterGenerationStep(@NotNull ValueParameter parameter) {
         if (parameter.type().isPrimitive()) {
             return new BuilderImplPrimitiveParameterGenerationStep(parameter, annotationHelper, builderImplClassName);
         }

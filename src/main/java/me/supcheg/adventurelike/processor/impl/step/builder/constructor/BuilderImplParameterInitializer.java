@@ -1,14 +1,14 @@
-package me.supcheg.adventurelike.processor.step.builder.constructor;
+package me.supcheg.adventurelike.processor.impl.step.builder.constructor;
 
 import com.palantir.javapoet.CodeBlock;
-import com.palantir.javapoet.ParameterSpec;
 import lombok.RequiredArgsConstructor;
+import me.supcheg.adventurelike.processor.value.ValueParameter;
 
 import java.util.Objects;
 
 @RequiredArgsConstructor
 public class BuilderImplParameterInitializer {
-    protected final ParameterSpec parameter;
+    protected final ValueParameter parameter;
 
     public CodeBlock newValueInitializer() {
         return CodeBlock.of("");

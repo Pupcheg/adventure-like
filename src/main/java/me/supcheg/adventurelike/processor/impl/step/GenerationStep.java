@@ -1,4 +1,4 @@
-package me.supcheg.adventurelike.processor.step;
+package me.supcheg.adventurelike.processor.impl.step;
 
 import com.palantir.javapoet.TypeSpec;
 import org.jetbrains.annotations.NotNull;

@@ -1,10 +1,10 @@
-package me.supcheg.adventurelike.processor.step.builder.constructor;
+package me.supcheg.adventurelike.processor.impl.step.builder.constructor;
 
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
-import com.palantir.javapoet.ParameterSpec;
 import com.palantir.javapoet.TypeName;
-import me.supcheg.adventurelike.processor.util.MoreTypes;
+import me.supcheg.adventurelike.processor.impl.util.MoreTypes;
+import me.supcheg.adventurelike.processor.value.ValueParameter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ public class BuilderImplCollectionParameterInitializer extends BuilderImplParame
     private final MoreTypes moreTypes;
     private final CollectionParameter collectionParameter;
 
-    public BuilderImplCollectionParameterInitializer(MoreTypes moreTypes, ParameterSpec parameter) {
+    public BuilderImplCollectionParameterInitializer(MoreTypes moreTypes, ValueParameter parameter) {
         super(parameter);
         this.moreTypes = moreTypes;
         this.collectionParameter = implementationClass();
@@ -68,7 +68,7 @@ public class BuilderImplCollectionParameterInitializer extends BuilderImplParame
 
     record CollectionParameter(
             ClassName implClass,
-            Function<ParameterSpec, CodeBlock> finalizer
+            Function<ValueParameter, CodeBlock> finalizer
     ) {
     }
 }

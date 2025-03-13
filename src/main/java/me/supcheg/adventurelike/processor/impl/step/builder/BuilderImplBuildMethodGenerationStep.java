@@ -1,12 +1,12 @@
-package me.supcheg.adventurelike.processor.step.builder;
+package me.supcheg.adventurelike.processor.impl.step.builder;
 
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
 import com.palantir.javapoet.MethodSpec;
 import com.palantir.javapoet.TypeSpec;
 import lombok.RequiredArgsConstructor;
-import me.supcheg.adventurelike.processor.step.GenerationStep;
-import me.supcheg.adventurelike.processor.step.builder.constructor.BuilderImplParameterInitializer;
+import me.supcheg.adventurelike.processor.impl.step.GenerationStep;
+import me.supcheg.adventurelike.processor.impl.step.builder.constructor.BuilderImplParameterInitializer;
 import org.jetbrains.annotations.NotNull;
 
 import javax.lang.model.element.Modifier;

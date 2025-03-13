@@ -1,11 +1,11 @@
-package me.supcheg.adventurelike.processor.step.builder.param;
+package me.supcheg.adventurelike.processor.impl.step.builder.param;
 
 import com.palantir.javapoet.AnnotationSpec;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
 import com.palantir.javapoet.FieldSpec;
-import com.palantir.javapoet.ParameterSpec;
-import me.supcheg.adventurelike.processor.util.AnnotationHelper;
+import me.supcheg.adventurelike.processor.impl.util.AnnotationHelper;
+import me.supcheg.adventurelike.processor.value.ValueParameter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class BuilderImplCollectionParameterGenerationStep extends BuilderImplParameterGenerationStep {
-    public BuilderImplCollectionParameterGenerationStep(ParameterSpec parameter, AnnotationHelper annotationHelper, ClassName builderImplClass) {
+    public BuilderImplCollectionParameterGenerationStep(ValueParameter parameter, AnnotationHelper annotationHelper, ClassName builderImplClass) {
         super(parameter, annotationHelper, builderImplClass);
     }
 
@@ -25,9 +25,9 @@ public class BuilderImplCollectionParameterGenerationStep extends BuilderImplPar
     }
 
     @Override
-    protected List<AnnotationSpec> fieldAnnotations() {
+    protected List<AnnotationSpec> setterParameterAnnotations() {
         return annotationHelper.removeIfPresent(
-                super.fieldAnnotations(),
+                super.setterParameterAnnotations(),
                 Unmodifiable.class
         );
     }

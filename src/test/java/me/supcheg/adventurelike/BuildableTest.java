@@ -7,17 +7,15 @@ import me.supcheg.adventurelike.processor.AdventureLikeProcessor;
 import org.junit.jupiter.api.Test;
 
 import javax.tools.JavaFileObject;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;
-import static lombok.Lombok.sneakyThrow;
 
 class BuildableTest {
     @Test
-    void run() {
+    void run() throws IOException {
         JavaFileObject source = JavaFileObjects.forSourceLines(
                 "MyCoolInterface",
                 """
@@ -81,17 +79,15 @@ class BuildableTest {
                 .withProcessors(new AdventureLikeProcessor())
                 .compile(source);
 
+        assertThat(compilation).generatedSourceFile("me.supcheg.adventurelike.test.MyCoolInterfaceImpl");
+        assertThat(compilation).succeeded();
+
         for (JavaFileObject sourceFile : compilation.generatedSourceFiles()) {
             try (Reader reader = sourceFile.openReader(true)) {
                 PrintWriter out = new PrintWriter(System.out);
                 reader.transferTo(out);
                 out.flush();
-            } catch (IOException e) {
-                throw sneakyThrow(e);
             }
         }
-
-        assertThat(compilation).generatedSourceFile("me.supcheg.adventurelike.test.MyCoolInterfaceImpl");
-        assertThat(compilation).succeeded();
     }
 }

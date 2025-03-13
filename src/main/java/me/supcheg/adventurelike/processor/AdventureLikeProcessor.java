@@ -1,14 +1,11 @@
 package me.supcheg.adventurelike.processor;
 
-import com.palantir.javapoet.JavaFile;
-import com.palantir.javapoet.TypeSpec;
-import me.supcheg.adventurelike.processor.parameter.ParameterSpecLookup;
-import me.supcheg.adventurelike.processor.strategy.AdventureLikeGenerationStrategy;
-import me.supcheg.adventurelike.processor.strategy.BuildableAdventureLikeGenerationStrategy;
-import me.supcheg.adventurelike.processor.strategy.SimpleAdventureLikeGenerationStrategy;
-import me.supcheg.adventurelike.processor.util.AnnotationHelper;
-import me.supcheg.adventurelike.processor.util.MoreTypes;
-import net.kyori.adventure.util.Buildable;
+import me.supcheg.adventurelike.processor.impl.ImplementationGenerator;
+import me.supcheg.adventurelike.processor.impl.strategy.BuildableAdventureLikeGenerationStrategy;
+import me.supcheg.adventurelike.processor.impl.strategy.SimpleAdventureLikeGenerationStrategy;
+import me.supcheg.adventurelike.processor.impl.util.AnnotationHelper;
+import me.supcheg.adventurelike.processor.impl.util.MoreTypes;
+import me.supcheg.adventurelike.processor.value.ValueParameterLookup;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -27,23 +24,22 @@ import java.util.Set;
 @SupportedAnnotationTypes("me.supcheg.adventurelike.AdventureLike")
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class AdventureLikeProcessor extends AbstractProcessor {
-    private AdventureLikeGenerationStrategy defaultStrategy;
-    private AdventureLikeGenerationStrategy buildableStrategy;
-    private MoreTypes moreTypes;
+    private final ValueParameterLookup valueParameterLookup = new ValueParameterLookup();
+    private ImplementationGenerator implementationGenerator;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        this.moreTypes = new MoreTypes(processingEnv);
 
-        this.defaultStrategy = new SimpleAdventureLikeGenerationStrategy(
-                new ParameterSpecLookup()
-        );
+        MoreTypes moreTypes = new MoreTypes(processingEnv);
 
-        this.buildableStrategy = new BuildableAdventureLikeGenerationStrategy(
-                new AnnotationHelper(),
-                moreTypes,
-                new ParameterSpecLookup()
+        this.implementationGenerator = new ImplementationGenerator(
+                new SimpleAdventureLikeGenerationStrategy(),
+                new BuildableAdventureLikeGenerationStrategy(
+                        new AnnotationHelper(),
+                        moreTypes
+                ),
+                moreTypes
         );
     }
 
@@ -51,8 +47,19 @@ public class AdventureLikeProcessor extends AbstractProcessor {
     public boolean process(@NotNull Set<? extends TypeElement> annotations, @NotNull RoundEnvironment roundEnv) {
         for (TypeElement annotation : annotations) {
             for (Element element : roundEnv.getElementsAnnotatedWith(annotation)) {
+                if (element.getKind() != ElementKind.INTERFACE) {
+                    processingEnv.getMessager().printError("Element is not an interface", element);
+                    continue;
+                }
+
+                ElementProcessContext ctx = new ElementProcessContext(
+                        ((TypeElement) element),
+                        ((PackageElement) element.getEnclosingElement()).getQualifiedName().toString(),
+                        valueParameterLookup.listValueParameters(element)
+                );
+
                 try {
-                    processElement(element);
+                    generateImplementations(ctx);
                 } catch (Exception e) {
                     processingEnv.getMessager().printError(e.toString(), element);
                 }
@@ -61,32 +68,7 @@ public class AdventureLikeProcessor extends AbstractProcessor {
         return true;
     }
 
-    private void processElement(@NotNull Element element) throws IOException {
-        if (element.getKind() != ElementKind.INTERFACE) {
-            throw new RuntimeException("Element is not an interface");
-        }
-
-        String interfaceClassPackage = ((PackageElement) element.getEnclosingElement()).getQualifiedName().toString();
-
-        TypeSpec typeSpec = strategyFor(element).generate(element);
-
-        JavaFile javaFile = JavaFile.builder(interfaceClassPackage, typeSpec)
-                .skipJavaLangImports(true)
-                .indent("    ")
-                .build();
-
-        javaFile.writeTo(processingEnv.getFiler());
-    }
-
-    private AdventureLikeGenerationStrategy strategyFor(Element element) {
-        if (isBuildable(element)) {
-            return buildableStrategy;
-        }
-
-        return defaultStrategy;
-    }
-
-    private boolean isBuildable(@NotNull Element element) {
-        return moreTypes.isAccessible(Buildable.class, element.asType());
+    private void generateImplementations(ElementProcessContext ctx) throws IOException {
+        implementationGenerator.processElement(ctx, processingEnv.getFiler());
     }
 }

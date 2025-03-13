@@ -1,8 +1,7 @@
-package me.supcheg.adventurelike.processor.parameter;
+package me.supcheg.adventurelike.processor.value;
 
 import com.palantir.javapoet.AnnotationSpec;
 import com.palantir.javapoet.ClassName;
-import com.palantir.javapoet.ParameterSpec;
 import com.palantir.javapoet.TypeName;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,11 +17,11 @@ import java.util.List;
 
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
-public class ParameterSpecLookup {
+public class ValueParameterLookup {
 
     @NotNull
-    public List<ParameterSpec> listRecordParametersForInterface(@NotNull Element element) {
-        List<ParameterSpec> parameters = new ArrayList<>();
+    public List<ValueParameter> listValueParameters(@NotNull Element element) {
+        List<ValueParameter> parameters = new ArrayList<>();
 
         for (ExecutableElement method : methodsIn(element.getEnclosedElements())) {
             if (isValueMethod(method)) {
@@ -41,19 +40,16 @@ public class ParameterSpecLookup {
     }
 
     @NotNull
-    private ParameterSpec makeParameter(@NotNull ExecutableElement method) {
+    private ValueParameter makeParameter(@NotNull ExecutableElement method) {
         TypeMirror returnType = method.getReturnType();
 
-        return ParameterSpec.builder(
-                        TypeName.get(returnType),
-                        method.getSimpleName().toString()
-                )
-                .addAnnotations(
-                        returnType.getAnnotationMirrors().stream()
-                                .map(this::convertAnnotationMirrorToAnnotationSpec)
-                                ::iterator
-                )
-                .build();
+        return new ValueParameter(
+                TypeName.get(returnType),
+                method.getSimpleName().toString(),
+                returnType.getAnnotationMirrors().stream()
+                        .map(this::convertAnnotationMirrorToAnnotationSpec)
+                        .toList()
+        );
     }
 
     @NotNull
